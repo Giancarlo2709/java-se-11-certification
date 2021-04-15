@@ -16,9 +16,11 @@
  */
 package labs.pm.app;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -43,7 +45,7 @@ public class Shop {
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
 
         ProductManager pm = new ProductManager("en-GB");
         pm.printProductReport(101);
@@ -52,6 +54,8 @@ public class Shop {
         pm.reviewProduct(164, Rating.FOUR_STAR, "Fine tea");
         pm.reviewProduct(164, Rating.FOUR_STAR, "This is not tea");
         pm.reviewProduct(164, Rating.FIVE_STAR, "Perfect!");
+        //pm.dumpData();
+        //pm.restoreData();
         pm.printProductReport(164);
         pm.printProducts(p -> p.getPrice().floatValue() < 2, 
                 (p1, p2) -> p2.getRating().ordinal() - p1.getRating().ordinal());

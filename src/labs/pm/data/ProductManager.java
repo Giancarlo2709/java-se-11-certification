@@ -17,6 +17,8 @@
 package labs.pm.data;
 
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.math.BigDecimal;
@@ -27,6 +29,7 @@ import java.nio.file.StandardOpenOption;
 import java.text.MessageFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -196,6 +199,35 @@ public class ProductManager {
                             product -> loadReviews(product)));
         } catch (IOException ex) {
             logger.log(Level.SEVERE, "Error loading data " + ex.getMessage(), ex);
+        }
+    }
+    
+    public void dumpData() {
+        try {
+            if (Files.notExists(tempFolder)) {
+                Files.createDirectory(tempFolder);
+            }
+            Path tempFile = tempFolder.resolve(MessageFormat.format(config.getString("temp.file"), Instant.now()));
+            try (ObjectOutputStream out = new ObjectOutputStream(Files.newOutputStream(tempFile, StandardOpenOption.CREATE))) {
+                out.writeObject(products);
+                products = new HashMap<>();
+            }
+        } catch (IOException ex) {
+            logger.log(Level.SEVERE, "Error dumping data " + ex.getMessage(), ex);
+        }
+    }
+    
+    @SuppressWarnings("unchecked")
+    public void restoreData() {
+        try {
+            Path tempFile = Files.list(tempFolder)
+                    .filter(path -> path.getFileName().toString().endsWith("tmp"))
+                    .findFirst().orElseThrow();
+            try (ObjectInputStream in = new ObjectInputStream(Files.newInputStream(tempFile, StandardOpenOption.READ))) {
+                products = (HashMap) in.readObject();
+            }
+        } catch (Exception ex) {
+            logger.log(Level.SEVERE, "Error restoring data " + ex.getMessage(), ex);
         }
     }
     
